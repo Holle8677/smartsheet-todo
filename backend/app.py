@@ -45,12 +45,21 @@ def add_tasks():
     smart_service.add_tasks([new_task])
 
     return jsonify('success')
-    pass
 
 @app.put('/api/tasks/<int:task_id>')
 @cross_origin()
-def update_tasks():
-    pass
+def update_tasks(task_id):
+    request_data = request.json
+    schema = TaskSchema()
+    try:
+        results = schema.load(request_data)
+    except ValidationError as e:
+        return jsonify(e.messages), 400
+    
+    new_task = Task(id=task_id)
+    new_task._load_from_dict(request_data)
+    smart_service.update_tasks([new_task])
+    return jsonify('success')
 
 @app.delete('/api/tasks/<task_id>')
 @cross_origin()
