@@ -59,18 +59,11 @@ class Smartsheet_service:
                     break
             else:
                 logger.error(
-                    "The specified database sheet contained unexpected columns."
+                    "The specified database sheet was found to be missing expected columns."
                 )
                 raise UnexpectedColumnsInDatabaseSheet(
-                    message="The specified database sheet contained unexpected columns."
+                    message="The specified database sheet was found to be missing expected columns."
                 )
-        if self.column_map.keys != config.COLUMN_NAMES:
-            logger.error(
-                "The specified database sheet was found to be missing expected columns."
-            )
-            raise UnexpectedColumnsInDatabaseSheet(
-                message="The specified database sheet was found to be missing expected columns."
-            )
 
     def _row_from_task(self, task: Task):
         title_cell = smartsheet.models.Cell()

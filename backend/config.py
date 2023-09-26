@@ -1,4 +1,6 @@
+###############################################################################
 # SMARTSHEET CONFIGS
+###############################################################################
 TITLE_COLUMN_NAME = "Task Name"
 DESCRIPTION_COLUMN_NAME = "Description"
 DUE_DATE_COLUMN_NAME = "Due Date"
