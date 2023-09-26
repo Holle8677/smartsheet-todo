@@ -1,10 +1,12 @@
-from models import Task
-
-import config
 import time
-import smartsheet
 import logging
 import os
+
+import smartsheet
+
+from models import Task
+from errors import UnexpectedColumnsInDatabaseSheet
+import config
 
 logger = logging.getLogger('todo')
 
@@ -27,6 +29,7 @@ class Smartsheet_service():
 
     def delete_tasks(self, task_ids: list[int]):
         self.smart.Sheets.delete_rows(self.task_sheet_id, task_ids)
+        
         self._fetch_sheet()
 
     def update_tasks(self, tasks: list[Task]):
@@ -55,7 +58,11 @@ class Smartsheet_service():
                     self.column_map[column_name] = column.id
                     break
             else:
-                pass # throw new specified sheet not compatible exception
+                logger.error('The specified database sheet contained unexpected columns.')
+                raise UnexpectedColumnsInDatabaseSheet(message='The specified database sheet contained unexpected columns.')
+        if self.column_map.keys != config.COLUMN_NAMES:
+            logger.error('The specified database sheet was found to be missing expected columns.')
+            raise UnexpectedColumnsInDatabaseSheet(message='The specified database sheet was found to be missing expected columns.')
 
     def _row_from_task(self, task: Task):
         title_cell = smartsheet.models.Cell()

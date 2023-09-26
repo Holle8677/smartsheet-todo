@@ -18,11 +18,6 @@ cors = CORS(app)
 logger.info('Todo app started')
 smart_service = smartsheet_service.Smartsheet_service()
 
-# @app.after_request
-# def apply_caching(response):
-#     response.headers["X-Frame-Options"] = "SAMEORIGIN"
-#     return response
-
 @app.get('/api/tasks/')
 @cross_origin()
 def get_tasks():
@@ -43,7 +38,6 @@ def add_tasks():
     new_task = Task()
     new_task._load_from_dict(request_data)
     smart_service.add_tasks([new_task])
-
     return jsonify('success')
 
 @app.put('/api/tasks/<int:task_id>')
@@ -64,16 +58,5 @@ def update_tasks(task_id):
 @app.delete('/api/tasks/<task_id>')
 @cross_origin()
 def delete_tasks(task_id):
-    try:
-        smart_service.delete_tasks([task_id])
-        return jsonify('success')
-    except Exception as e:
-        return jsonify('failure')
-
-
-
-# logging?
-# where to hold cached sheet?
-# error handling
-# work directly with smartsheet data model? tracking row ids into the task model?
-# pass smartsheet success or error on to user
+    smart_service.delete_tasks([task_id])
+    return jsonify('success')
