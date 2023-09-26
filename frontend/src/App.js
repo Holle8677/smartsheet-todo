@@ -17,6 +17,10 @@ class App extends Component {
         completed: false,
       },
     };
+
+    axios.defaults.baseURL = configData.SERVER_URL;
+    axios.defaults.headers.post['Content-Type'] ='application/json;charset=utf-8';
+    axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
   }
 
   componentDidMount() {
@@ -25,7 +29,7 @@ class App extends Component {
 
   refreshList = () => {
     axios
-      .get(`${configData.SERVER_URL}/api/tasks/`)
+      .get('/api/tasks/')
       .then((res) => this.setState({ todoList: res.data }))
       .catch((err) => console.log(err));
   };
@@ -39,18 +43,18 @@ class App extends Component {
 
     if (item.id) {
       axios
-        .put(`${configData.SERVER_URL}/api/tasks/${item.id}/`, item)
+        .put(`/api/tasks/${item.id}`, item)
         .then((res) => this.refreshList());
       return;
     }
     axios
-      .post(`${configData.SERVER_URL}/api/tasks/`, item)
+      .post('/api/tasks/', item)
       .then((res) => this.refreshList());
   };
 
   handleDelete = (item) => {
     axios
-      .delete(`${configData.SERVER_URL}/api/tasks/${item.id}/`)
+      .delete(`/api/tasks/${item.id}`)
       .then((res) => this.refreshList());
   };
 

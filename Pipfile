@@ -7,8 +7,10 @@ name = "pypi"
 flask = "*"
 smartsheet-python-sdk = "*"
 flask-cors = "*"
+marshmallow = "*"
 
 [dev-packages]
+python-dotenv = "*"
 
 [requires]
 python_version = "3.10"

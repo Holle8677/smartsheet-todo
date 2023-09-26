@@ -3,49 +3,49 @@ from models import Task
 import config
 import time
 import smartsheet
-import logging #TODO
+import logging
 import os
 
+logger = logging.getLogger('todo')
 
 class Smartsheet_service():
     def __init__(self):
         self.task_sheet_id = os.getenv('TASK_SHEET_ID')
         self.smart = smartsheet.Smartsheet()
-        logging.info('Initial Smartsheet connection opened')
+        logger.info('Initial Smartsheet connection opened')
         self.smart.errors_as_exceptions(True)
-        self.__fetch_sheet()
+        self._fetch_sheet()
         
 
     def fetch_all_tasks(self):
         if not self.task_sheet or self.task_sheet_ttl < time.time():
-            self.__fetch_sheet()
-
+            self._fetch_sheet()
         tasks = []
         for row in self.task_sheet.rows:
-            tasks.append(self.__task_from_row(row))
+            tasks.append(self._task_from_row(row))
         return tasks
 
     def delete_tasks(self, task_ids: list[int]):
         self.smart.Sheets.delete_rows(self.task_sheet_id, task_ids)
-        self.__fetch_sheet()
+        self._fetch_sheet()
 
     def update_tasks(self, tasks: list[Task]):
         updated_rows = []
         for task in tasks:
-            updated_rows.append(self.__row_from_task(task))
+            updated_rows.append(self._row_from_task(task))
         self.smart.Sheets.update_rows(self.task_sheet_id, updated_rows)
-        self.__fetch_sheet
+        self._fetch_sheet()
 
     def add_tasks(self, tasks: list[Task]):
         new_rows = []
         for task in tasks:
-            new_rows.append(self.__row_from_task(task))
+            new_rows.append(self._row_from_task(task))
         self.smart.Sheets.add_rows(self.task_sheet_id, new_rows)
-        self.__fetch_sheet
+        self._fetch_sheet()
 
-    def __fetch_sheet(self):
+    def _fetch_sheet(self):
         self.task_sheet = self.smart.Sheets.get_sheet(self.task_sheet_id)
-        logging.info('DB sheet re-fetched')
+        logger.info('DB sheet re-fetched')
         self.task_sheet_ttl = time.time() + config.TTL
         self.column_map = {}
 
@@ -57,7 +57,7 @@ class Smartsheet_service():
             else:
                 pass # throw new specified sheet not compatible exception
 
-    def __row_from_task(self, task: Task):
+    def _row_from_task(self, task: Task):
         title_cell = smartsheet.models.Cell()
         title_cell.column_id = self.column_map[config.TITLE_COLUMN_NAME]
         title_cell.value = task.title
@@ -82,7 +82,7 @@ class Smartsheet_service():
         
         return new_row
 
-    def __task_from_row(self, row: smartsheet.models.Row):
+    def _task_from_row(self, row: smartsheet.models.Row):
         new_task = Task()
         for cell in row.cells:
             if cell.column_id == self.column_map[config.TITLE_COLUMN_NAME]:
@@ -101,7 +101,3 @@ class Smartsheet_service():
     
         
 
-# logging?
-# where to hold cached sheet?
-# error handling
-# work directly with smartsheet data model? tracking row ids into the task model?
