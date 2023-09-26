@@ -8,16 +8,16 @@ from models import Task
 from errors import UnexpectedColumnsInDatabaseSheet
 import config
 
-logger = logging.getLogger('todo')
+logger = logging.getLogger("todo")
 
-class Smartsheet_service():
+
+class Smartsheet_service:
     def __init__(self):
-        self.task_sheet_id = os.getenv('TASK_SHEET_ID')
+        self.task_sheet_id = os.getenv("TASK_SHEET_ID")
         self.smart = smartsheet.Smartsheet()
-        logger.info('Initial Smartsheet connection opened')
+        logger.info("Initial Smartsheet connection opened")
         self.smart.errors_as_exceptions(True)
         self._fetch_sheet()
-        
 
     def fetch_all_tasks(self):
         if not self.task_sheet or self.task_sheet_ttl < time.time():
@@ -29,7 +29,7 @@ class Smartsheet_service():
 
     def delete_tasks(self, task_ids: list[int]):
         self.smart.Sheets.delete_rows(self.task_sheet_id, task_ids)
-        
+
         self._fetch_sheet()
 
     def update_tasks(self, tasks: list[Task]):
@@ -48,7 +48,7 @@ class Smartsheet_service():
 
     def _fetch_sheet(self):
         self.task_sheet = self.smart.Sheets.get_sheet(self.task_sheet_id)
-        logger.info('DB sheet re-fetched')
+        logger.info("DB sheet re-fetched")
         self.task_sheet_ttl = time.time() + config.TTL
         self.column_map = {}
 
@@ -58,11 +58,19 @@ class Smartsheet_service():
                     self.column_map[column_name] = column.id
                     break
             else:
-                logger.error('The specified database sheet contained unexpected columns.')
-                raise UnexpectedColumnsInDatabaseSheet(message='The specified database sheet contained unexpected columns.')
+                logger.error(
+                    "The specified database sheet contained unexpected columns."
+                )
+                raise UnexpectedColumnsInDatabaseSheet(
+                    message="The specified database sheet contained unexpected columns."
+                )
         if self.column_map.keys != config.COLUMN_NAMES:
-            logger.error('The specified database sheet was found to be missing expected columns.')
-            raise UnexpectedColumnsInDatabaseSheet(message='The specified database sheet was found to be missing expected columns.')
+            logger.error(
+                "The specified database sheet was found to be missing expected columns."
+            )
+            raise UnexpectedColumnsInDatabaseSheet(
+                message="The specified database sheet was found to be missing expected columns."
+            )
 
     def _row_from_task(self, task: Task):
         title_cell = smartsheet.models.Cell()
@@ -82,11 +90,13 @@ class Smartsheet_service():
         completed_cell.value = task.completed
 
         new_row = smartsheet.models.Row()
-        new_row.cells.extend([title_cell, description_cell, due_date_cell, completed_cell])
+        new_row.cells.extend(
+            [title_cell, description_cell, due_date_cell, completed_cell]
+        )
 
         if task.id is not None:
             new_row.id = task.id
-        
+
         return new_row
 
     def _task_from_row(self, row: smartsheet.models.Row):
@@ -103,8 +113,3 @@ class Smartsheet_service():
 
         new_task.id = row.id
         return new_task
-
-
-    
-        
-
